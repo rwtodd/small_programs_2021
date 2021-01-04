@@ -1,0 +1,10 @@
+* Small Programs (2021)
+
+I make a repository every year for little bits of code that aren't
+important enough to need their own repository.  This is the repo
+for 2021.
+
+** Directories:
+
+ - None yet.
+
