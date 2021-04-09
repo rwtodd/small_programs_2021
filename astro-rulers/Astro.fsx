@@ -7,13 +7,12 @@ module Astrology
   
 *)
 
-type Element = | Fire | Air | Water | Earth
-type Quadruplicity = | Cardinal | Fixed | Mutable
-type Planet = | Saturn | Jupiter | Mars | Sun | Venus | Mercury | Moon
-type Sign =
-     | Aries | Taurus | Gemini | Cancer
-     | Leo | Virgo | Libra | Scorpio
-     | Sagittarius | Capricorn | Aquarius | Pisces
+type Element = Fire | Air | Water | Earth
+type Quadruplicity = Cardinal | Fixed | Mutable
+type Planet = Saturn | Jupiter | Mars | Sun | Venus | Mercury | Moon
+type Sign = Aries | Taurus | Gemini | Cancer
+          | Leo | Virgo | Libra | Scorpio
+          | Sagittarius | Capricorn | Aquarius | Pisces
 
 let private planets =
    [| Saturn ; Jupiter ; Mars ; Sun ; Venus ; Mercury ; Moon |]
@@ -23,8 +22,7 @@ let private signs =
        Leo ; Virgo ; Libra ; Scorpio ;
        Sagittarius ; Capricorn ; Aquarius ; Pisces |]
                 
-let exaltation p =
-   match p with
+let exaltation = function
       | Saturn  -> Libra
       | Jupiter -> Cancer
       | Mars    -> Capricorn
@@ -33,61 +31,53 @@ let exaltation p =
       | Mercury -> Virgo
       | Moon    -> Taurus
 
-let sign_triplicity s =
-   match s with
-     | Aries | Leo | Sagittarius -> Fire
-     | Taurus | Virgo | Capricorn -> Earth
-     | Gemini | Libra | Aquarius -> Air
-     | Cancer | Scorpio | Pisces -> Water
+let sign_triplicity = function
+      | Aries | Leo | Sagittarius  -> Fire
+      | Taurus | Virgo | Capricorn -> Earth
+      | Gemini | Libra | Aquarius  -> Air
+      | Cancer | Scorpio | Pisces  -> Water
 
-let sign_quadrupliticy s =
-   match s with
-     | Aries | Cancer | Libra | Capricorn -> Cardinal
-     | Leo | Scorpio | Aquarius | Taurus -> Fixed
-     | Sagittarius | Pisces | Gemini | Virgo -> Mutable
+let sign_quadrupliticy = function
+      | Aries | Cancer | Libra | Capricorn    -> Cardinal
+      | Leo | Scorpio | Aquarius | Taurus     -> Fixed
+      | Sagittarius | Pisces | Gemini | Virgo -> Mutable
 
-let sign_ruler s =
-   match s with
-     | Capricorn | Aquarius -> Saturn
-     | Sagittarius | Pisces -> Jupiter
-     | Aries | Scorpio -> Mars
-     | Leo -> Sun
-     | Libra | Taurus -> Venus
-     | Gemini | Virgo -> Mercury
-     | Cancer -> Moon
+let sign_ruler = function
+      | Capricorn | Aquarius -> Saturn
+      | Sagittarius | Pisces -> Jupiter
+      | Aries | Scorpio      -> Mars
+      | Leo                  -> Sun
+      | Libra | Taurus       -> Venus
+      | Gemini | Virgo       -> Mercury
+      | Cancer               -> Moon
 
-let planet_rules p = seq {
-   for s in signs do
-      if (sign_ruler s) = p then
-         s
-} 
+let planet_rules p = seq { for s in signs do if (sign_ruler s) = p then s } 
 
-let sign_opposite s =
-   match s with
-     | Aries       -> Libra
-     | Taurus      -> Scorpio
-     | Gemini      -> Sagittarius
-     | Cancer      -> Capricorn
-     | Leo         -> Aquarius
-     | Virgo       -> Pisces
-     | Libra       -> Aries
-     | Scorpio     -> Taurus
-     | Sagittarius -> Gemini
-     | Capricorn   -> Cancer
-     | Aquarius    -> Leo
-     | Pisces      -> Virgo
+let private sign_shift sign amount =
+  signs.[((match sign with
+           | Aries       -> 0
+           | Taurus      -> 1
+           | Gemini      -> 2
+           | Cancer      -> 3
+           | Leo         -> 4
+           | Virgo       -> 5
+           | Libra       -> 6
+           | Scorpio     -> 7
+           | Sagittarius -> 8
+           | Capricorn   -> 9
+           | Aquarius    -> 10
+           | Pisces      -> 11) + amount) % 12]
+
+let sign_opposite s = sign_shift s 6
 
 let fall = exaltation >> sign_opposite
 
-let decan_ruler sign nth =
-  let idx = (Array.findIndex (fun s -> s = sign) signs) + (nth - 1)*4
-  sign_ruler signs.[idx % 12]
+let decan_ruler sign nth = sign_shift sign ((nth - 1)*4) |> sign_ruler
      
-let sign_similar s =
-  match s with
-     | Leo    -> Cancer
-     | Cancer -> Leo
-     | _ -> s |> sign_ruler |> planet_rules |> Seq.find (fun s2 -> s2 <> s)
+let sign_similar = function
+  | Leo    -> Cancer
+  | Cancer -> Leo
+  | s      -> s |> sign_ruler |> planet_rules |> Seq.find (fun s2 -> s2 <> s)
    
 let sign_compliment = sign_similar >> sign_opposite
 
@@ -104,7 +94,7 @@ let hello () =
        printfn "Similar to %A is %A" s (sign_similar s)
     printfn "**** COMPLIMENTS (opposite of similar sign) ****"
     for s in signs do
-       printfn "Compiment to to %A is %A" s (sign_compliment s)
+       printfn "Compiment to %A is %A" s (sign_compliment s)
     printfn "**** EXALTATIONS and FALLS (of sign ruler) ****"
     for s in signs do
        let ruler = sign_ruler s
