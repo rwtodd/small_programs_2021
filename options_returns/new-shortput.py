@@ -7,7 +7,7 @@ import math
 TODAY        = date.today()
 DAYS_IN_YEAR = 261
 
-def weekdays_between(d1,d2):
+def weekdays_between(d1: date, d2: date) -> int:
     "Weekdays between two dates, inclusive"
     day_count = 1 + (d2 - d1).days
     wday = d1.weekday()
@@ -16,10 +16,10 @@ def weekdays_between(d1,d2):
     return day_count + ceil((wday+1)/7) - ceil((wday+1+day_count)/7) + \
                        ceil((wday+2)/7) - ceil((wday+2+day_count)/7)
 
-def annualized(strike, prem, days):
+def annualized(strike: float, prem: float, days: int) -> float:
     return 100 * math.pow(1.0 + (prem / strike), DAYS_IN_YEAR / days) - 100
 
-def parse_date(d):
+def parse_date(d: str) -> date:
     """Parse a date loosely, which could be given as '' == TODAY, or
     dd == day dd of the current month, or
     mm-dd == day dd of month mm of the current year, or
