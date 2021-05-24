@@ -35,14 +35,15 @@ def parse_date(d: str) -> date:
     return date(*provided)
 
 if __name__ == '__main__':
-    FRIDAY = TODAY + timedelta(((4 - TODAY.weekday()) + 7) % 7)
     import argparse
     parser = argparse.ArgumentParser(description='Determine the annualized value of an option premium.')
     parser.add_argument('strike', type=float, help='the strike price')
     parser.add_argument('premium', type=float, help='the premium collected')
-    parser.add_argument('-e','--expires', type=parse_date, default=FRIDAY, help='the expiration date (defaults to this friday)')
+    parser.add_argument('-e','--expires', type=parse_date, default=date.min, help='the expiration date (defaults to the friday after the open date)')
     parser.add_argument('-o','--open', type=parse_date, default=TODAY, help='the date the position is opened (defaults to today)')
     args = parser.parse_args()
+    if args.expires == date.min:
+        args.expires = args.open + timedelta(((4 - args.open.weekday()) + 7) % 7)
     days = weekdays_between(args.open, args.expires)
     strike, prem = args.strike, args.premium
     result = annualized(strike, prem, days)
