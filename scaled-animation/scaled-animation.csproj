@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<RootNamespace>scaled_animation</RootNamespace>
+		<UseWPF>true</UseWPF>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<nullable>enable</nullable>
+		<LangVersion>latest</LangVersion>
+		<WarningsAsErrors>CS8600;CS8602;CS8603</WarningsAsErrors>
+	</PropertyGroup>
+
+</Project>
