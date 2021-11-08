@@ -1,0 +1,17 @@
+#+TITLE: org-rwtodd.cellz
+#+AUTHOR: Richard Todd
+
+* Fun with Cellular Automata
+
+  I thought it would be fun to have a playground for cellular
+  automata... look in the cellz.clj file for examples.  It is set up
+  for rewrite rules which look at the 2 cells above (=run-rule-w2=)
+  and rules that take the 3 cells above (=run-rule-w3=).  The
+  function are not limited to binary values.  Anything from 0 to 255
+  is ok.
+
+  #+BEGIN_SRC clojure
+(run-rule-w3 30 (initial-random-cells 21 3) rfunc-3)
+  #+END_SRC
+
+  
