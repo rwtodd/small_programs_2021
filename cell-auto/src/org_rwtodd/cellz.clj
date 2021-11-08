@@ -5,7 +5,10 @@
 (defn print-row
   "Display a row in a line"
   [row]
-  (apply println row))
+  (println (apply str  (map (fn [n]
+                              (case n
+                                0 \.
+                                n)) row))))
 
 ;; ====== Rule steppers....
 (defn step-w2!
@@ -67,7 +70,7 @@
 (defn rfunc-3
   [a b c]
   (mod
-   (if (<= a b c) (inc (* a c)) (* b c))
+   (if (<= a c) (+ a c) (+ a b))
    3))
 
 (comment "some example runs"
