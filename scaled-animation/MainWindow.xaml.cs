@@ -23,43 +23,43 @@ namespace scaled_animation
     {
         private int ctr;
         private readonly WriteableBitmap wbm;
+        private readonly uint red = 0xffff00ff;
+        private readonly uint blue = 0x00cc00ff;
+
         public MainWindow()
         {
             InitializeComponent();
             ctr = -1;
-            wbm = new(160, 200, 96, 96, PixelFormats.Indexed4, BitmapPalettes.Gray16);
+            wbm = new(160, 200, 96, 96, PixelFormats.Bgr32, null);
             AgiScreen.Source = wbm;
-            var dtm = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(16)  };
+            var dtm = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(300) };
             dtm.Tick += Dtm_Tick;
             dtm.Start();
         }
 
-        private void Dtm_Tick(object sender, EventArgs e)
+        private void Dtm_Tick(object? sender, EventArgs e)
         {
-            ctr += 1;
-            if (ctr >= wbm.PixelHeight)
-            {
-                (sender as DispatcherTimer)?.Stop();
-                return;
-            }
+            ctr = (ctr + 1)&1;
 
             try
             {
                 wbm.Lock();
                 unsafe
                 {
-                    int stride = wbm.BackBufferStride;
-                    Span<byte> sb = new Span<byte>(wbm.BackBuffer.ToPointer(), stride * wbm.PixelHeight);
-                    int row = this.ctr;
-                    int color = this.ctr % 16;
-                    int sbIdx = row * stride;
-                    for(int col = 0; col < stride; col++)
+                    int stride = wbm.BackBufferStride >> 2;
+                    Span<uint> sb = new Span<uint>(wbm.BackBuffer.ToPointer(), stride * wbm.PixelHeight);
+                    for (int row = 0; row < wbm.PixelHeight; row++)
                     {
-                        sb[sbIdx++] = (byte)(color | (color << 4));
+                        int sbIdx = row * stride;
+                        for (int col = 0; col < wbm.PixelWidth; col++)
+                        {
+                            sb[sbIdx++] = (((ctr + (row>>1) + col) & 1) == 0) ? red : blue;
+                        }
+
                     }
 
                     // Specify the area of the bitmap that changed.
-                    wbm.AddDirtyRect(new Int32Rect(0, row, wbm.PixelWidth, 1));
+                    wbm.AddDirtyRect(new Int32Rect(0, 0, wbm.PixelWidth, wbm.PixelHeight));
                 }
             }
             finally
