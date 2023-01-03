@@ -23,8 +23,10 @@ namespace scaled_animation
     {
         private int ctr;
         private readonly WriteableBitmap wbm;
-        private readonly uint red = 0xffff00ff;
-        private readonly uint blue = 0x00cc00ff;
+        private readonly uint[] palette = new uint[16] { 
+            0x00, 0xaa, 0xaa00, 0xaaaa, 0xaa0000, 0xaa00aa, 0xaa5500, 0xaaaaaa,
+            0x555555, 0x5555ff, 0x55ff55, 0x55ffff, 0xff5555, 0xff55ff, 0xffff55, 0xffffff
+        };
 
         public MainWindow()
         {
@@ -32,20 +34,22 @@ namespace scaled_animation
             ctr = -1;
             wbm = new(160, 200, 96, 96, PixelFormats.Bgr32, null);
             AgiScreen.Source = wbm;
-            var dtm = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(300) };
+            var dtm = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(1000/60) };
             dtm.Tick += Dtm_Tick;
             dtm.Start();
         }
 
         private void Dtm_Tick(object? sender, EventArgs e)
         {
-            ctr = (ctr + 1)&1;
+            ctr = ctr + 1;
+            if(ctr > 15) ctr = 0;
 
             try
             {
                 wbm.Lock();
                 unsafe
                 {
+                    int pIdx = ctr;
                     int stride = wbm.BackBufferStride >> 2;
                     Span<uint> sb = new Span<uint>(wbm.BackBuffer.ToPointer(), stride * wbm.PixelHeight);
                     for (int row = 0; row < wbm.PixelHeight; row++)
@@ -53,9 +57,11 @@ namespace scaled_animation
                         int sbIdx = row * stride;
                         for (int col = 0; col < wbm.PixelWidth; col++)
                         {
-                            sb[sbIdx++] = (((ctr + (row>>1) + col) & 1) == 0) ? red : blue;
+                            sb[sbIdx++] = palette[pIdx++];
+                            if(pIdx > 15) pIdx = 0;
                         }
-
+                        ++pIdx;
+                        if(pIdx > 15) pIdx = 0;
                     }
 
                     // Specify the area of the bitmap that changed.
